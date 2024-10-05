@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
+
+////////////////////////////////////////////////////////////////
+const authRoute = require("./routes/AuthRoute");
+
 const { HoldingsModel } = require("./model/HoldingsModel");
 
 const { PositionsModel } = require("./model/PositionsModel");
@@ -15,8 +19,18 @@ const uri = process.env.MONGO_URL;
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Set your frontend URL
+  credentials: true, // Allow cookies to be sent
+}));
+
+
 app.use(bodyParser.json());
+
+
+///////////////////////////////////////////////////////////////////////////////////
+app.use("/", authRoute);
 
 // app.get("/addHoldings", async (req, res) => {
 //   let tempHoldings = [
