@@ -15,6 +15,8 @@ const Holdings = () => {
   }, []);
 
   // const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  // console.log(allHoldings)
+  console.log(allHoldings);
   const labels = allHoldings.map((subArray) => subArray["name"]);
 
   const data = {

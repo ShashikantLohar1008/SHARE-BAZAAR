@@ -40,10 +40,12 @@ const Login = () => {
       console.log(data);
       const { success, message } = data;
       if (success) {
-        console.log(message);
         handleSuccess(message);
         setTimeout(() => {
-          navigate("/");
+          // Redirect to dashboard's Home component
+          // window.location.href = "http://localhost:5174/home"; // Dashboard URL
+          window.location.href = data.redirectUrl;
+          console.log("done")
         }, 1000);
       } else {
         handleError(message);

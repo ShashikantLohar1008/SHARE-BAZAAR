@@ -20,10 +20,18 @@ const uri = process.env.MONGO_URL;
 const app = express();
 
 // app.use(cors());
+
+
 app.use(cors({
-  origin: 'http://localhost:5173', // Set your frontend URL
+  origin: ['http://localhost:5173', 'http://localhost:5174'], // Allow access from both ports
   credentials: true, // Allow cookies to be sent
 }));
+
+// app.use(cors({
+//   origin: true, // Allow all origins
+//   credentials: true, // Allow cookies to be sent
+// }));
+
 
 
 app.use(bodyParser.json());
