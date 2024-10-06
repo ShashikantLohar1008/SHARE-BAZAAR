@@ -7,71 +7,68 @@ import GeneralContext from "./GeneralContext";
 
 import "./BuyActionWindow.css";
 
-const BuyActionWindow = ({ uid }) => {
+const SellActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
 
-  const {closeBuyWindow}=useContext(GeneralContext);
+  const {closeSellWindow}=useContext(GeneralContext);
 
  
   const handleCancelClick = () => {
-    closeBuyWindow();
+    closeSellWindow();
   };
 
-  const handleBuyClick = async () => {
+  
+
+  const handleSellClick = async () => {
     try {
-      // First, create a new buy order
+      // First, create a new sell order
       const response = await axios.post("http://localhost:3002/newOrder", {
         name: uid,
         qty: stockQuantity,
         price: stockPrice,
-        mode: "BUY",
+        mode: "SELL",
       });
   
       // Assuming the response contains the average price, net, and day change
       const { avg, net, day } = response.data; // Make sure your backend sends this data
+      console.log(avg);
   
       // Fetch current holdings to update quantity
       const holdingsResponse = await axios.get(`http://localhost:3002/allHoldings`);
-      
+  
       const currentHolding = holdingsResponse.data.find(holding => holding.name === uid);
+      console.log(currentHolding);
   
       if (currentHolding) {
         // Update the quantity for the stock in holdings
-        const updatedQty = currentHolding.qty + stockQuantity; // Add new quantity to existing quantity
-        
-        await axios.put(`http://localhost:3002/updateHolding/${currentHolding._id}`, {
-          qty: updatedQty,
-          avg, // You may need to adjust how you calculate avg price
-          price: stockPrice,
-          net,
-          day,
-        });
+        const updatedQty = currentHolding.qty - stockQuantity; // Subtract the quantity being sold
+  
+        if (updatedQty > 0) {
+          // If quantity is still greater than zero, update the holding
+          await axios.put(`http://localhost:3002/updateHolding/${currentHolding._id}`, {
+            qty: updatedQty,
+            avg, // Adjust how you calculate avg price for selling
+            price: stockPrice,
+            net,
+            day,
+          });
+        } else {
+          // If quantity goes to zero, delete the holding
+          await axios.delete(`http://localhost:3002/deleteHolding/${currentHolding._id}`);
+        }
       } else {
-        // If there's no existing holding, create a new entry in holdings
-        await axios.post("http://localhost:3002/newHolding", {
-          name: uid,
-          qty: stockQuantity,
-          avg,
-          price: stockPrice,
-          net,
-          day,
-        });
+        console.warn("No holdings found for this stock.");
       }
   
-      console.log("Buy order and holdings updated successfully");
-      // GeneralContext.closeBuyWindow();
+      console.log("Sell order and holdings updated successfully");
     } catch (error) {
-      console.error("Error processing buy order:", error);
-      // GeneralContext.closeBuyWindow();
+      console.error("Error processing sell order:", error);
     }
-    console.log("hello");
-    // GeneralContext.closeBuyWindow();
-    closeBuyWindow();
-    
-  };
-
   
+    // Close the sell window instead of the buy window
+    closeSellWindow();
+  };
   
   
   return (
@@ -105,8 +102,8 @@ const BuyActionWindow = ({ uid }) => {
       <div className="buttons">
         <span>Margin required ₹140.65</span>
         <div>
-          <Link className="btn btn-blue" onClick={handleBuyClick}>
-            Buy
+          <Link className="btn btn-blue" onClick={handleSellClick}>
+            Sell
           </Link>
           <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
             Cancel
@@ -117,7 +114,7 @@ const BuyActionWindow = ({ uid }) => {
   );
 };
 
-export default BuyActionWindow;
+export default SellActionWindow;
 
 
 

@@ -48,6 +48,8 @@ const Login = () => {
           console.log("done")
         }, 1000);
       } else {
+        alert("you have'n register ,Please register first");
+        navigate('/Signup');
         handleError(message);
       }
     } catch (error) {

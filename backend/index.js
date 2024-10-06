@@ -219,16 +219,97 @@ app.get("/allPositions", async (req, res) => {
   res.json(allPositions);
 });
 
-app.post("/newOrder",async(req,res)=>{
-  let newOrder = new OrdersModel({
+// app.post("/newOrder",async(req,res)=>{
+//   let newOrder = new OrdersModel({
+//     name:req.body.name,
+//     qty:req.body.qty,
+//     price:req.body.price,
+//     mode:req.body.mode,
+//   });
+//   newOrder.save();
+//   res.send("order saved");
+// })
+
+app.post("/newOrder", async (req, res) => {
+  try {
+    // Create a new order object
+    let newOrder = new OrdersModel({
+      name: req.body.name,
+      qty: req.body.qty,
+      price: req.body.price,
+      mode: req.body.mode,
+    });
+
+    // Save the new order to the database
+    await newOrder.save();
+
+    // Assuming you have a way to calculate or fetch avg, net, and day values
+    // Here, we use placeholders for avg, net, and day.
+    // Replace these with actual calculations or database queries as needed.
+    const avg = newOrder.price; // Example: setting avg to the order price
+    const net = "+0.00%"; // Example placeholder for net percentage change
+    const day = "+0.00%"; // Example placeholder for daily change
+
+    // Send back the response with the required information
+    res.status(201).json({
+      message: "Order saved",
+      avg,
+      net,
+      day,
+    });
+  } catch (error) {
+    console.error("Error saving order:", error);
+    res.status(500).json({ message: "Error saving order", error });
+  }
+});
+
+
+app.post("/newHolding",async(req,res)=>{
+  let newHolding = new HoldingsModel({
     name:req.body.name,
     qty:req.body.qty,
+    avg:req.body.avg,
     price:req.body.price,
-    mode:req.body.mode,
-  });
-  newOrder.save();
-  res.send("order saved");
-})
+    net:req.body.net,
+    day:req.body.day,
+});
+newHolding.save();
+res.send("Holding saved");
+});
+
+app.put('/updateHolding/:id', async (req, res) => {
+  const { qty, avg, price, net, day } = req.body;
+  try {
+    const updatedHolding = await HoldingsModel.findByIdAndUpdate(
+      req.params.id,
+      { qty, avg, price, net, day },
+      { new: true }
+    );
+    res.status(200).json(updatedHolding);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating holding", error });
+  }
+});
+
+app.delete("/deleteHolding/:id", async (req, res) => {
+  const holdingId = req.params.id; // Get the holding ID from the request parameters
+
+  try {
+    // Find the holding by ID and delete it
+    const deletedHolding = await HoldingsModel.findByIdAndDelete(holdingId);
+
+    if (deletedHolding) {
+      return res.status(200).json({ message: "Holding deleted successfully" });
+    } else {
+      return res.status(404).json({ message: "Holding not found" });
+    }
+  } catch (error) {
+    // Handle errors that occur during the deletion process
+    console.error("Error deleting holding:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log("App started!");
